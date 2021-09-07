@@ -1,6 +1,10 @@
 <template>
   <div>
-    <base-dialog :show="!!error" title="An error occurred!" @close="handleError">
+    <base-dialog
+      :show="!!error"
+      title="An error occurred!"
+      @close="handleError"
+    >
       <p>{{ error }}</p>
     </base-dialog>
     <section>
@@ -8,25 +12,33 @@
     </section>
     <section>
       <base-card>
-      <div class="controls">
-        <base-button mode="outline" @click="loadCoaches(true)">refresh</base-button>
-        <base-button v-if="!isCoach && !isLoading" link to="register">Register a coach</base-button>
-      </div>
-      <div v-if="isLoading">
-        <base-spinner></base-spinner>
-      </div>
-      <ul v-else-if="hasCoaches">
-        <coach-item 
-          v-for="coach in filteredCoaches" 
-          :key="coach.id" 
-          :id="coach.id" 
-          :first-name="coach.firstName" 
-          :last-name="coach.lastName" 
-          :rate="coach.hourlyRate"
-          :areas="coach.areas"
-        ></coach-item>
-      </ul>
-      <h3 v-else>No coaches found</h3>
+        <div class="controls">
+          <base-button mode="outline" @click="loadCoaches(true)"
+            >refresh</base-button
+          >
+          <base-button link to="/auth" v-if="!isLoggedIn">Login</base-button>
+          <base-button
+            v-if="isLoggedIn && !isCoach && !isLoading"
+            link
+            to="register"
+            >Register a coach</base-button
+          >
+        </div>
+        <div v-if="isLoading">
+          <base-spinner></base-spinner>
+        </div>
+        <ul v-else-if="hasCoaches">
+          <coach-item
+            v-for="coach in filteredCoaches"
+            :key="coach.id"
+            :id="coach.id"
+            :first-name="coach.firstName"
+            :last-name="coach.lastName"
+            :rate="coach.hourlyRate"
+            :areas="coach.areas"
+          ></coach-item>
+        </ul>
+        <h3 v-else>No coaches found</h3>
       </base-card>
     </section>
   </div>
@@ -41,7 +53,7 @@ export default {
   components: {
     CoachItem,
     CoachesFilter,
-    BaseSpinner
+    BaseSpinner,
   },
   data() {
     return {
@@ -51,17 +63,20 @@ export default {
         frontend: true,
         backend: true,
         career: true,
-      }
-    }
+      },
+    };
   },
   computed: {
+    isLoggedIn() {
+      return this.$store.getters.isAuthenticated;
+    },
     isCoach() {
       return this.$store.getters['coaches/isCoach'];
     },
     filteredCoaches() {
       // return this.$store.getters['coaches/coaches'];
       const coaches = this.$store.getters['coaches/coaches'];
-      return coaches.filter(coach => {
+      return coaches.filter((coach) => {
         if (this.activeFilters.frontend && coach.areas.includes('frontend')) {
           return true;
         }
@@ -72,11 +87,11 @@ export default {
           return true;
         }
         return false;
-      })
+      });
     },
     hasCoaches() {
       return !this.isLoading && this.$store.getters['coaches/hasCoaches'];
-    }
+    },
   },
   created() {
     this.loadCoaches();
@@ -88,7 +103,9 @@ export default {
     async loadCoaches(refresh = false) {
       this.isLoading = true;
       try {
-        await this.$store.dispatch('coaches/loadCoaches', {forceRefresh: refresh});
+        await this.$store.dispatch('coaches/loadCoaches', {
+          forceRefresh: refresh,
+        });
       } catch (error) {
         this.error = error.message || 'Something went wrong';
       }
@@ -96,9 +113,9 @@ export default {
     },
     handleError() {
       this.error = null;
-    }, 
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
